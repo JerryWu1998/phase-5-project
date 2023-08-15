@@ -8,6 +8,7 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from flask_bcrypt import Bcrypt
+from flask_socketio import SocketIO  # <-- Add this import for SocketIO
 
 # Local imports
 
@@ -34,5 +35,8 @@ CORS(app)
 # Setup bcrypt
 bcrypt = Bcrypt(app)
 
-#Set secret key
+# Set secret key
 app.secret_key = b'\x90y\xf7\xdd\x0b\xbb9\x8a\x03\x7f\xc1\xaaV\xd5I\xbd'
+
+# Instantiate SocketIO with app
+socketio = SocketIO(app, cors_allowed_origins="*")  # <-- This initializes SocketIO with your app
