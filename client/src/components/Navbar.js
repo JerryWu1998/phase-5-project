@@ -24,7 +24,7 @@ function Navbar() {
   }
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+    <nav className="navbar navbar-expand-lg navbar-white" style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)' }}>
       <div className="d-flex justify-content-between w-100">
         {/* Logo and Home link */}
         <div className="d-flex align-items-center ms-2">
@@ -39,19 +39,20 @@ function Navbar() {
         <div>
           {loggedIn ? (
             <>
-              <Link className="btn btn-outline-info me-2" to="/profile">Profile</Link>
-              <button className="btn btn-outline-danger" onClick={handleLogout}>Log Out</button>
+              <Link className="btn btn-outline-dark me-2" to="/profile">Profile</Link>
+              <button className="btn btn-outline-dark me-2" onClick={handleLogout}>Log Out</button>
             </>
           ) : (
             <>
-              <button className="btn btn-outline-warning me-2" onClick={handleSignup}>Sign Up</button>
-              <button className="btn btn-outline-danger me-2" onClick={handleLogin}>Log In</button>
+              <button className="btn btn-outline-dark me-2" onClick={handleSignup}>Sign Up</button>
+              <button className="btn btn-outline-dark me-2" onClick={handleLogin}>Log In</button>
             </>
           )}
         </div>
       </div>
     </nav>
-  );
+);
+
 }
 
 export default Navbar;

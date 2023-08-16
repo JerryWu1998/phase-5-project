@@ -9,6 +9,7 @@ import UserContext from '../context/UserContext.js';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null); 
 
   useEffect(() => {
     checkLoginStatus();
@@ -19,16 +20,28 @@ function App() {
       .then(response => response.json())
       .then(data => {
         setLoggedIn(data.loggedIn);
+        if (data.loggedIn) {
+          setCurrentUser(data.user); 
+        }
       })
       .catch(error => {
         console.error("Error checking login status:", error);
       });
   };
 
+  const bgImageUrl = "https://wallpapercave.com/wp/wp9067458.jpg";
+
   return (
-    <UserContext.Provider value={{ loggedIn, setLoggedIn }}>
+    <UserContext.Provider value={{ loggedIn, setLoggedIn, currentUser, setCurrentUser }}>
       <Router>
-        <div className="App">
+        <div className="App" style={{ 
+          backgroundImage: `url(${bgImageUrl})`, 
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundAttachment: 'fixed',  
+          backgroundRepeat: 'repeat',     
+          minHeight: '100vh'
+        }}>
           <Navbar />
 
           <Switch>

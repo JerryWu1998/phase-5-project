@@ -6,15 +6,18 @@ class Chat(db.Model, SerializerMixin):
     __tablename__ = 'chats'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     message_content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
-    user = db.relationship('User', back_populates='chats')
+    sender = db.relationship('User', back_populates='sent_messages', foreign_keys=[sender_id])
+    receiver = db.relationship('User', back_populates='received_messages', foreign_keys=[receiver_id])
 
-    serialize_rules = ('-user.chats',)
+    serialize_rules = ('-sender.sent_messages', '-receiver.received_messages')
 
     def __repr__(self):
-        return f'<Chat {self.id} by User {self.user_id}>'
+        return f'<Chat {self.id} from User {self.sender_id} to User {self.receiver_id}>'
+
 
 

@@ -1,21 +1,41 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
 import UserContext from '../context/UserContext.js';
+import ChatContainer from './ChatContainer';
 
 function Home() {
-    const { loggedIn } = useContext(UserContext);
+  const { loggedIn } = useContext(UserContext);
 
-    return (
-        <div className="home-container">
-            <h1>Welcome to Chess&Chat!</h1>
-            
-            {!loggedIn && (
-                <div className="auth-reminder">
-                    <p>To enjoy all the features, please <Link to="/login">Login</Link> or <Link to="/signup">Signup</Link>!</p>
-                </div>
-            )}
+  const boxStyle = {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    padding: '20px',
+    borderRadius: '10px',
+    margin: 'auto'
+  };
+
+  return (
+    <div className="home-container container mt-5">
+      {!loggedIn ? (
+        <div className="text-center" style={{ ...boxStyle, width: '800px' }}>
+          <h2>Welcome to Chess&Chat!</h2>
+          <p>Please login or signup to start playing and chatting.</p>
         </div>
-    );
+      ) : (
+        <div className="d-flex flex-column align-items-center">
+          <div className="chess-section my-3" style={{ ...boxStyle, width: '800px' }}>
+            <h2 className='text-center'>Chess</h2>
+            <hr style={{ width: '100%', maxWidth: '800px' }} />
+            {/* 这里可以加入棋类游戏的相关组件或内容 */}
+          </div>
+
+          <div className="chat-section my-3" style={{ ...boxStyle, width: '800px' }}>
+            <h2 className='text-center'>Chat</h2>
+            <hr style={{ width: '100%' }} />
+            <ChatContainer />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default Home;

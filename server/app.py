@@ -59,7 +59,7 @@ class Chats(Resource):
     def post(self):
         data = request.get_json()
         try:
-            new_chat = Chat(user_id=data['user_id'], message_content=data['message_content'])
+            new_chat = Chat(sender_id=data['sender_id'], receiver_id=data['receiver_id'], message_content=data['message_content'])
             db.session.add(new_chat)
             db.session.commit()
             return make_response(new_chat.to_dict(), 201)
@@ -89,11 +89,12 @@ api.add_resource(ChatById, '/chats/<int:id>')
 # WebSocket route for live chat
 @socketio.on('send_message')
 def handle_message(data):
-    user_id = data['user_id']
+    sender_id = data['sender_id']
+    receiver_id = data['receiver_id']
     message_content = data['message_content']
 
     try:
-        new_chat = Chat(user_id=user_id, message_content=message_content)
+        new_chat = Chat(sender_id=sender_id, receiver_id=receiver_id, message_content=message_content)
         db.session.add(new_chat)
         db.session.commit()
 

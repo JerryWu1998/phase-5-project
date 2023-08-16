@@ -8,9 +8,10 @@ class User(db.Model, SerializerMixin):
     username = db.Column(db.String, nullable=False, unique=True)
     _password_hash = db.Column(db.String, nullable=False)
     
-    chats = db.relationship('Chat', back_populates='user')
+    sent_messages = db.relationship('Chat', back_populates='sender', foreign_keys='Chat.sender_id')
+    received_messages = db.relationship('Chat', back_populates='receiver', foreign_keys='Chat.receiver_id')
 
-    serialize_rules = ('-chats.user', '-_password_hash')
+    serialize_rules = ('-sent_messages.sender', '-sent_messages.receiver', '-received_messages.sender', '-received_messages.receiver', '-_password_hash')
 
     @property
     def password_hash(self):
@@ -28,5 +29,3 @@ class User(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f'<User {self.id} {self.username}>'
-
-

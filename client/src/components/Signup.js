@@ -7,7 +7,7 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   
-  const { setLoggedIn } = useContext(UserContext);
+  const { setLoggedIn, setCurrentUser } = useContext(UserContext);
   const history = useHistory();
 
   const handleSubmit = async (event) => {
@@ -29,7 +29,9 @@ function Signup() {
         const data = await response.json();
         console.log(data);
         setLoggedIn(true);
+        setCurrentUser(data.user);
         history.push('/');
+        window.location.reload();
       } else {
         const data = await response.json();
         setError(data.error || 'Failed to signup.');
@@ -39,32 +41,51 @@ function Signup() {
     }
   };
 
+  const boxStyle = {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    padding: '20px',
+    borderRadius: '10px',
+    width: '100%',
+    margin: 'auto'
+  };
+
   return (
-    <div className="container">
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Username</label>
-          <input
-            type="text"
-            className="form-control"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+    <div className="container h-100 mt-5">
+      <div className="row justify-content-center align-items-center h-100">
+        <div className="col-md-5">
+          <div style={boxStyle}>
+            <form onSubmit={handleSubmit}>
+              <div>
+                <h2 className="text-center">Signup</h2>
+              </div>
+              {error && <div className="alert alert-danger">{error}</div>}
+              <div className="mb-3">
+                <label className="form-label">Username</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Password</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className="d-flex justify-content-center">
+                <button type="submit" className="btn btn-dark">
+                  Signup
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div className="mb-3">
-          <label className="form-label">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        {error && <div className="alert alert-danger">{error}</div>}
-        <button type="submit" className="btn btn-primary">
-          Signup
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
