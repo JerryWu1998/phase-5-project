@@ -21,9 +21,9 @@ const ChatNavbar = ({ onSelectUser, newMessages, setNewMessages }) => {
     fetchUsers();
   }, []);
 
-  const filteredUsers = users.filter(user => 
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) && user.id !== currentUser.id
-  );
+  const filteredUsers = users
+    .filter(user => user.username.toLowerCase().includes(searchTerm.toLowerCase()) && user.id !== currentUser.id)
+    .sort((a, b) => (newMessages.includes(b.id) ? 1 : 0) - (newMessages.includes(a.id) ? 1 : 0));
 
   return (
     <div className="chat-navbar">

@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import io from 'socket.io-client';
 import UserContext from '../context/UserContext.js';
 
 const MessageList = ({ selectedUser, setNewMessages }) => {
   const [messages, setMessages] = useState([]);
   const { currentUser } = useContext(UserContext);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (currentUser) {
@@ -13,14 +14,15 @@ const MessageList = ({ selectedUser, setNewMessages }) => {
       newSocket.on('broadcast_message', (newMessage) => {
         if (newMessage.sender_id === currentUser.id || newMessage.receiver_id === currentUser.id) {
           setMessages((prevMessages) => [...prevMessages, newMessage]);
-          setNewMessages((prev) => [...prev, newMessage.sender_id]);
+          if (newMessage.sender_id !== currentUser.id) {
+            setNewMessages((prev) => [...prev, newMessage.sender_id]);
+          }
         }
       });
 
       return () => newSocket.close();
     }
-  }, [currentUser, setNewMessages]); 
-
+  }, [currentUser, setNewMessages]);
 
   useEffect(() => {
     if (currentUser) {
@@ -37,6 +39,12 @@ const MessageList = ({ selectedUser, setNewMessages }) => {
       fetchMessages();
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [selectedUser, messages]);
 
   const categorizeMessages = () => {
     let categorized = {};
@@ -75,11 +83,11 @@ const MessageList = ({ selectedUser, setNewMessages }) => {
               </div>
             )
           })}
+          <div ref={messagesEndRef} />
         </div>
       )}
     </div>
   );
-
 };
 
 export default MessageList;
