@@ -3,8 +3,7 @@ import MessageList from './MessageList';
 import ChatInput from './ChatInput';
 import ChatNavbar from './ChatNavbar';
 
-function ChatContainer() {
-  const [selectedUser, setSelectedUser] = useState(null);
+function ChatContainer({ selectedUser, setSelectedUser }) {
   const [newMessages, setNewMessages] = useState([]);
 
   const styles = {

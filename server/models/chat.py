@@ -14,7 +14,10 @@ class Chat(db.Model, SerializerMixin):
     sender = db.relationship('User', back_populates='sent_messages', foreign_keys=[sender_id])
     receiver = db.relationship('User', back_populates='received_messages', foreign_keys=[receiver_id])
 
-    serialize_rules = ('-sender.sent_messages', '-receiver.received_messages')
+    serialize_rules = ('-sender.sent_messages',
+                       '-sender.received_messages',
+                       '-receiver.sent_messages',
+                       '-receiver.received_messages')
 
     def __repr__(self):
         return f'<Chat {self.id} from User {self.sender_id} to User {self.receiver_id}>'

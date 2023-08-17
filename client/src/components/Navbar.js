@@ -32,7 +32,7 @@ function Navbar() {
             <img src="https://cdn-icons-png.flaticon.com/512/2965/2965874.png"
               alt="Wiccapedia Logo" style={{ width: '40px', marginRight: '5px' }}/>
           </Link>
-          <Link className="navbar-brand" to="/">Chess&Chat</Link>
+          <Link className="navbar-brand" to="/">Play&Chat</Link>
         </div>
 
         {/* Login/Logout */}

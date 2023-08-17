@@ -11,7 +11,26 @@ class User(db.Model, SerializerMixin):
     sent_messages = db.relationship('Chat', back_populates='sender', foreign_keys='Chat.sender_id')
     received_messages = db.relationship('Chat', back_populates='receiver', foreign_keys='Chat.receiver_id')
 
-    serialize_rules = ('-sent_messages.sender', '-sent_messages.receiver', '-received_messages.sender', '-received_messages.receiver', '-_password_hash')
+    # Define relationships to TicTacToe models
+    tic_tac_toe_as_x = db.relationship('TicTacToe', foreign_keys='TicTacToe.player_x_id', back_populates='player_x')
+    tic_tac_toe_as_o = db.relationship('TicTacToe', foreign_keys='TicTacToe.player_o_id', back_populates='player_o')
+    tic_tac_toe_as_current = db.relationship('TicTacToe', foreign_keys='TicTacToe.current_player_id', back_populates='current_player')
+    game_steps = db.relationship('TicTacToeStep', back_populates='player')
+    tables_as_x = db.relationship('TicTacToeTable', foreign_keys='TicTacToeTable.player_x_id', back_populates='player_x')
+    tables_as_o = db.relationship('TicTacToeTable', foreign_keys='TicTacToeTable.player_o_id', back_populates='player_o')
+
+    serialize_rules = ('-sent_messages.sender', 
+                       '-sent_messages.receiver',
+                       '-received_messages.sender', 
+                       '-received_messages.receiver',
+                       '-_password_hash', 
+                       '-tic_tac_toe_as_x', 
+                       '-tic_tac_toe_as_o',
+                       '-tic_tac_toe_as_current', 
+                       '-game_steps.player',
+                       '-game_steps.game',
+                       '-tables_as_x',
+                       '-tables_as_o')
 
     @property
     def password_hash(self):
