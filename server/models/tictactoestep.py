@@ -7,7 +7,7 @@ class TicTacToeStep(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey('tictactoes.id'), nullable=False)
     player_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    step_position = db.Column(db.String, nullable=False)  # e.g., A1, B2, C3
+    step_position = db.Column(db.Integer, nullable=False)
 
     game = db.relationship('TicTacToe', back_populates='steps')
     player = db.relationship('User', back_populates='game_steps')

@@ -60,6 +60,7 @@ def seed_database():
     # No steps generated based on your requirements
 
     print("Seeding completed!")
+    
 
 if __name__ == '__main__':
     with app.app_context():

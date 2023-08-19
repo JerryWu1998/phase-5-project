@@ -1,44 +1,55 @@
 import React, { useState, useEffect, useContext } from 'react';
-import socketIOClient from "socket.io-client";
 import UserContext from '../context/UserContext.js';
 
-function TicTacToeTableList() {
+function TicTacToeTableList({ socket, setShowGame }) {
   const [tables, setTables] = useState([]);
   const { currentUser } = useContext(UserContext);
-  
-  // 在state中管理socket，以确保它只被创建一次
-  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = socketIOClient("/"); // 实例化socket连接
-    setSocket(newSocket);
-
-    // 获取初始游戏桌列表
     fetch('/tictactoetables')
       .then(response => response.json())
       .then(data => setTables(data));
 
-    // 监听新的游戏桌事件
-    newSocket.on("broadcast_table", newTable => {
+    if (!socket) return;  // Ensure that the socket has been initialized
+
+    socket.on("broadcast_table", newTable => {
       setTables(prevTables => [...prevTables, newTable]);
     });
 
-    // 监听游戏桌更新事件
-    newSocket.on("update_table", updatedTable => {
-      setTables(prevTables => 
+    socket.on("update_table", updatedTable => {
+      setTables(prevTables =>
         prevTables.map(table => table.id === updatedTable.id ? updatedTable : table)
       );
+
+      if (updatedTable.player_x_id && updatedTable.player_o_id) {
+        setShowGame(true);
+      }
     });
 
-    // 断开socket连接
-    return () => newSocket.disconnect();
+    return () => socket.off();
+  }, [setShowGame, socket]);
 
-  }, []); // 这里的空数组表示这个effect只在组件mount和unmount时运行
+  const isUserAlreadySeated = () => {
+    return tables.some(table => table.player_x_id === currentUser.id || table.player_o_id === currentUser.id);
+  };
+
+  const isSeatTaken = (seatUserId) => {
+    return seatUserId && seatUserId !== currentUser.id;
+  };
 
   const joinTable = (tableId, position) => {
+    if (!socket) return; // Ensure that the socket has been initialized
+
+    const currentPosition = position === "X" ? "player_x_id" : "player_o_id";
+    const table = tables.find(table => table.id === tableId);
+
+    if (isUserAlreadySeated() && table[currentPosition] !== currentUser.id) {
+      return;
+    }
+
     socket.emit('join_table', {
       table_id: tableId,
-      position: position === "X" ? "player_x_id" : "player_o_id",
+      position: currentPosition,
       user_id: currentUser.id
     });
   };
@@ -47,17 +58,17 @@ function TicTacToeTableList() {
     <div>
       {tables.map(table => (
         <div key={table.id} className="table">
-          <button 
-            className="btn btn-primary" 
-            disabled={table.player_x_id && table.player_x_id !== currentUser.id}
+          <button
+            className="btn btn-primary"
+            disabled={(isUserAlreadySeated() && table.player_x_id !== currentUser.id) || isSeatTaken(table.player_x_id)}
             onClick={() => joinTable(table.id, "X")}>
-              {table.player_x_id ? (table.player_x_id === currentUser.id ? 'You (X)' : 'Taken') : 'X'}
+            {table.player_x_id ? (table.player_x_id === currentUser.id ? 'You (X)' : 'Taken') : 'X'}
           </button>
-          <button 
-            className="btn btn-secondary" 
-            disabled={table.player_o_id && table.player_o_id !== currentUser.id}
+          <button
+            className="btn btn-secondary"
+            disabled={(isUserAlreadySeated() && table.player_o_id !== currentUser.id) || isSeatTaken(table.player_o_id)}
             onClick={() => joinTable(table.id, "O")}>
-              {table.player_o_id ? (table.player_o_id === currentUser.id ? 'You (O)' : 'Taken') : 'O'}
+            {table.player_o_id ? (table.player_o_id === currentUser.id ? 'You (O)' : 'Taken') : 'O'}
           </button>
         </div>
       ))}

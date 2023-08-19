@@ -189,7 +189,12 @@ class TicTacToeSteps(Resource):
             
             steps_of_current_player = [s.step_position for s in TicTacToeStep.query.filter_by(game_id=data['game_id'], player_id=data['player_id']).all()]
             if check_winner(steps_of_current_player):
+                game = TicTacToe.query.filter_by(id=data['game_id']).first()
+                game.winner_id = data['player_id']
+                game.game_status = "completed"
+                db.session.commit()
                 return make_response({"winner": data['player_id']})
+            
             socketio.emit('broadcast_step', new_step.to_dict())
             socketio.emit('update_game', {'game_id': new_step.game_id})
 
@@ -253,7 +258,6 @@ def handle_join_table(data):
 
     if position == "player_x_id":
         if table.player_x_id == user_id:
-            # 如果用户再次点击相同的座位，则设置为null
             table.player_x_id = None
         elif not table.player_x_id:
             table.player_x_id = user_id
@@ -263,7 +267,6 @@ def handle_join_table(data):
 
     elif position == "player_o_id":
         if table.player_o_id == user_id:
-            # 如果用户再次点击相同的座位，则设置为null
             table.player_o_id = None
         elif not table.player_o_id:
             table.player_o_id = user_id
@@ -272,6 +275,24 @@ def handle_join_table(data):
             return
 
     db.session.commit()
+
+    # 检查两个位置是否都有玩家
+    if table.player_x_id and table.player_o_id:
+        # 创建新的井字棋游戏
+        new_game = TicTacToe(
+            player_x_id=table.player_x_id,
+            player_o_id=table.player_o_id,
+            current_player_id=table.player_x_id,
+            table_id=table.id
+        )
+        db.session.add(new_game)
+        db.session.commit()
+
+        # 使用Socket.io通知玩家游戏已开始
+        socketio.emit('game_started', {
+            'table_id': table_id,
+            'game_id': new_game.id
+        })
 
     socketio.emit('update_table', table.to_dict())
 
