@@ -173,9 +173,6 @@ api.add_resource(TicTacToeGameById, '/tictactoes/<int:id>')
 
 # TicTacToeStep Resource
 class TicTacToeSteps(Resource):
-    def get(self):
-        return make_response([s.to_dict() for s in TicTacToeStep.query.all()])
-
     def post(self):
         data = request.get_json()
         try:
@@ -187,21 +184,34 @@ class TicTacToeSteps(Resource):
             db.session.add(new_step)
             db.session.commit()
             
+            game = TicTacToe.query.filter_by(id=data['game_id']).first()
+
+            # Check for winner
             steps_of_current_player = [s.step_position for s in TicTacToeStep.query.filter_by(game_id=data['game_id'], player_id=data['player_id']).all()]
             if check_winner(steps_of_current_player):
-                game = TicTacToe.query.filter_by(id=data['game_id']).first()
                 game.winner_id = data['player_id']
                 game.game_status = "completed"
                 db.session.commit()
+                
+                # Notify front-end about the winner via Socket.io
+                socketio.emit('announce_winner', {'game_id': new_step.game_id, 'winner_id': game.winner_id})
+
                 return make_response({"winner": data['player_id']})
-            
+
+            # Switch the current player
+            if game.current_player_id == game.player_x_id:
+                game.current_player_id = game.player_o_id
+            else:
+                game.current_player_id = game.player_x_id
+            db.session.commit()
+
             socketio.emit('broadcast_step', new_step.to_dict())
-            socketio.emit('update_game', {'game_id': new_step.game_id})
+            socketio.emit('update_game', {'game_id': new_step.game_id, 'current_player_id': game.current_player_id})
 
             return make_response(new_step.to_dict(), 201)
+
         except Exception as e:
             return make_response({"error": "Error while making a step: " + str(e)}, 400)
-
 def check_winner(steps_of_current_player):
     winning_combinations = [
         [1, 2, 3], [4, 5, 6], [7, 8, 9],
@@ -215,6 +225,7 @@ def check_winner(steps_of_current_player):
     return False
 
 api.add_resource(TicTacToeSteps, '/tictactoesteps')
+
 
 # TicTacToeTable Resource
 class TicTacToeTables(Resource):

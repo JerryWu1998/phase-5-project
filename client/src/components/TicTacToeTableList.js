@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import UserContext from '../context/UserContext.js';
 
-function TicTacToeTableList({ socket, setShowGame }) {
+function TicTacToeTableList({ socket, setShowGame, setGameId }) {
   const [tables, setTables] = useState([]);
   const { currentUser } = useContext(UserContext);
 
@@ -20,14 +20,23 @@ function TicTacToeTableList({ socket, setShowGame }) {
       setTables(prevTables =>
         prevTables.map(table => table.id === updatedTable.id ? updatedTable : table)
       );
-
       if (updatedTable.player_x_id && updatedTable.player_o_id) {
         setShowGame(true);
       }
     });
 
-    return () => socket.off();
-  }, [setShowGame, socket]);
+    // Listen for the game_started event
+    socket.on("game_started", (data) => {
+      // Set the game ID and display the game
+      setGameId(data.game_id);
+      setShowGame(true);
+    });
+
+    return () => {
+      // When the component is unmounted, remove all listeners associated with the socket
+      socket.off();
+    };
+  }, [setShowGame, socket, setGameId]);
 
   const isUserAlreadySeated = () => {
     return tables.some(table => table.player_x_id === currentUser.id || table.player_o_id === currentUser.id);

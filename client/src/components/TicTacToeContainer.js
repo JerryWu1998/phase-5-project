@@ -5,25 +5,19 @@ import socketIOClient from "socket.io-client";
 
 function TicTacToeContainer() {
   const [showGame, setShowGame] = useState(false);
-  const [tableId, setTableId] = useState(null);
+  const [gameId, setGameId] = useState(null); 
   const socket = socketIOClient("/");
 
-  const startGame = (id) => {
-      setTableId(id);
-      setShowGame(true);
-  };
 
   return (
-      <div>
-          <h3>Tic Tac Toe</h3>
-          {showGame 
-              ? <TicTacToe socket={socket} tableId={tableId} /> 
-              : <TicTacToeTableList socket={socket} startGame={startGame} setShowGame={setShowGame} />
-          }
-      </div>
+    <div>
+      <h3>Tic Tac Toe</h3>
+      {showGame 
+          ? <TicTacToe socket={socket} gameId={gameId} /> 
+          : <TicTacToeTableList socket={socket} setGameId={setGameId} setShowGame={setShowGame} />
+      }
+    </div>
   );
 }
-
-
 
 export default TicTacToeContainer;
