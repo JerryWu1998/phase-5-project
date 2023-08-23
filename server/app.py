@@ -198,7 +198,7 @@ class TicTacToeSteps(Resource):
                 game.game_status = "completed"
                 db.session.commit()
                 
-                # Notify front-end about the winner via Socket.io
+                # Notify front-end about the winner
                 socketio.emit('announce_winner', {'game_id': new_step.game_id, 'winner_id': game.winner_id})
                 socketio.emit('broadcast_step', new_step.to_dict())
                 return make_response({"winner": data['player_id']})
@@ -208,7 +208,7 @@ class TicTacToeSteps(Resource):
                 game.game_status = "draw"
                 db.session.commit()
                 
-                # Notify front-end about the draw via Socket.io
+                # Notify front-end about the draw
                 socketio.emit('announce_draw', {'game_id': new_step.game_id})
                 socketio.emit('broadcast_step', new_step.to_dict())
                 return make_response({"result": "draw"})
@@ -220,7 +220,7 @@ class TicTacToeSteps(Resource):
                 game.current_player_id = game.player_x_id
             db.session.commit()
 
-            # Then, broadcast the current player
+            # Broadcast the current player
             socketio.emit('update_game', {'game_id': new_step.game_id, 'current_player_id': game.current_player_id})
 
             return make_response(new_step.to_dict(), 201)
@@ -228,9 +228,6 @@ class TicTacToeSteps(Resource):
         except Exception as e:
             return make_response({"error": "Error while making a step: " + str(e)}, 400)
 
-# ... [Rest of the code remains unchanged]
-
-        
 def check_winner(steps_of_current_player):
     winning_combinations = [
         [1, 2, 3], [4, 5, 6], [7, 8, 9],
