@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import TicTacToeTableList from './TicTacToeTableList';
 import TicTacToe from './TicTacToe';
 import socketIOClient from "socket.io-client";
+import UserContext from '../context/UserContext.js';
 
 function TicTacToeContainer() {
-  const [showGame, setShowGame] = useState(false);
   const [gameId, setGameId] = useState(null); 
   const socket = socketIOClient("/");
-
+  const { showGame } = useContext(UserContext);
 
   return (
     <div>
       <h3 className="text-center">Tic Tac Toe</h3>
       {showGame 
-          ? <TicTacToe socket={socket} gameId={gameId} setShowGame={setShowGame} /> 
-          : <TicTacToeTableList socket={socket} setGameId={setGameId} setShowGame={setShowGame} />
+          ? <TicTacToe socket={socket} gameId={gameId} /> 
+          : <TicTacToeTableList socket={socket} setGameId={setGameId} />
       }
     </div>
   );

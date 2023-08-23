@@ -19,9 +19,9 @@ def seed_database():
 
     # Generating users
     users = []
-    for i in range(1, 4):  # Create 3 users
+    for i in range(1, 4): 
         user = User(username=f'user{i}')
-        user.password_hash = 'password'  # Use setter method to hash the password
+        user.password_hash = 'password' 
         users.append(user)
         db.session.add(user)
     db.session.commit()
@@ -29,35 +29,33 @@ def seed_database():
     # Custom chat messages
     messages = [
         'Hey, how are you?',
-        'Did you complete the task?',
-        'This looks great!',
-        'Check out my new profile picture.',
-        'The event starts at 8 PM.'
+        'Let us play.',
+        'Hello!',
+        'Check this out.',
+        'Today at 8pm.'
     ]
 
     # Generating chat messages
-    for content in messages:  # Sample 5 chat messages without replacement
-        sender, receiver = sample(users, 2)  # Pick two random users without replacement
+    for content in messages:  
+        sender, receiver = sample(users, 2) 
         chat = Chat(sender_id=sender.id, receiver_id=receiver.id, message_content=content)
         db.session.add(chat)
     db.session.commit()
 
     # Generating TicTacToe games
     games = []
-    for i in range(2):  # Create 2 games
+    for i in range(2): 
         game = TicTacToe(player_x_id=users[i].id, player_o_id=users[(i+1)%3].id, current_player_id=users[i].id, game_status="completed")
         games.append(game)
         db.session.add(game)
     db.session.commit()
 
     # Generating TicTacToe tables 
-    for i in range(5):  # Create 5 tables
+    for i in range(5): 
         table = TicTacToeTable()
-        table.games.append(games[i % 2])  # Associate with one of the 2 games
+        table.games.append(games[i % 2])  
         db.session.add(table)
     db.session.commit()
-
-    # No steps generated based on your requirements
 
     print("Seeding completed!")
     

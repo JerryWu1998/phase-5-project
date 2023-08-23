@@ -18,7 +18,7 @@ function Home() {
       {!loggedIn ? (
         <div className="text-center" style={{ ...boxStyle, width: '800px' }}>
           <h2>Welcome to Play&Chat!</h2>
-          <p>Please login or signup to start playing and chatting.</p>
+          <p>Please log in or sign up to start playing and chatting.</p>
         </div>
       ) : (
         <div className="d-flex flex-column align-items-center">

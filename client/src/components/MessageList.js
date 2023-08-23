@@ -21,7 +21,7 @@ const MessageList = ({ selectedUser, setNewMessages }) => {
       newSocket.on('broadcast_message', (newMessage) => {
         if (newMessage.sender_id === currentUser.id || newMessage.receiver_id === currentUser.id) {
           setMessages((prevMessages) => [...prevMessages, newMessage]);
-          if (newMessage.sender_id !== currentUser.id) {
+          if (newMessage.sender_id !== currentUser.id && (!selectedUser || newMessage.sender_id !== selectedUser.id)) {
             setNewMessages((prev) => [...prev, newMessage.sender_id]);
           }
         }
@@ -29,7 +29,7 @@ const MessageList = ({ selectedUser, setNewMessages }) => {
 
       return () => newSocket.off();
     }
-  }, [currentUser, setNewMessages]);
+  }, [currentUser, setNewMessages, selectedUser]);
 
   useEffect(() => {
     if (currentUser) {

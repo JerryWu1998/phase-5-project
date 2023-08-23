@@ -271,6 +271,7 @@ class TicTacToeTableById(Resource):
 api.add_resource(TicTacToeTables, '/tictactoetables')
 api.add_resource(TicTacToeTableById, '/tictactoetables/<int:id>')
 
+# For 2 users creating a game
 @socketio.on('join_table')
 def handle_join_table(data):
     table_id = data['table_id']
@@ -325,9 +326,6 @@ def handle_join_table(data):
         })
 
     socketio.emit('update_table', table.to_dict())
-
-
-    
 
 
 if __name__ == "__main__":

@@ -28,7 +28,7 @@ const ChatNavbar = ({ selectedUser, setSelectUser, newMessages, setNewMessages }
   return (
     <div className="chat-navbar">
       <div className="input-group mb-3">
-        <input 
+        <input
           type="text"
           className="form-control"
           placeholder="Search users..."
@@ -40,9 +40,9 @@ const ChatNavbar = ({ selectedUser, setSelectUser, newMessages, setNewMessages }
 
       <div className="list-group">
         {filteredUsers.map(user => (
-          <Link 
+          <Link
             to="#"
-            key={user.id} 
+            key={user.id}
             className="list-group-item list-group-item-action"
             onClick={() => {
               setSelectUser(user);
@@ -52,7 +52,9 @@ const ChatNavbar = ({ selectedUser, setSelectUser, newMessages, setNewMessages }
             }}
           >
             {user.username}
-            {newMessages.includes(user.id) && user.id !== selectedUser.id && <span className="badge bg-dark ml-2 ms-2">New</span>}
+            {newMessages.includes(user.id) && (!selectedUser || user.id !== selectedUser.id) &&
+              <span className="badge bg-dark ml-2 ms-2">New</span>}
+
           </Link>
         ))}
       </div>

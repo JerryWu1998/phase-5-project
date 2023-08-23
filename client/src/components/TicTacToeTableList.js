@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import UserContext from '../context/UserContext.js';
 
-function TicTacToeTableList({ socket, setShowGame, setGameId }) {
+function TicTacToeTableList({ socket, setGameId }) {
   const [tables, setTables] = useState([]);
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setShowGame } = useContext(UserContext);
 
   useEffect(() => {
     fetch('/tictactoetables')
