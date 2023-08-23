@@ -10,7 +10,7 @@ function TicTacToeTableList({ socket, setShowGame, setGameId }) {
       .then(response => response.json())
       .then(data => setTables(data));
 
-    if (!socket) return;  // Ensure that the socket has been initialized
+    if (!socket) return;
 
     socket.on("broadcast_table", newTable => {
       setTables(prevTables => [...prevTables, newTable]);
@@ -25,15 +25,12 @@ function TicTacToeTableList({ socket, setShowGame, setGameId }) {
       }
     });
 
-    // Listen for the game_started event
     socket.on("game_started", (data) => {
-      // Set the game ID and display the game
       setGameId(data.game_id);
       setShowGame(true);
     });
 
     return () => {
-      // When the component is unmounted, remove all listeners associated with the socket
       socket.off();
     };
   }, [setShowGame, socket, setGameId]);
@@ -47,7 +44,7 @@ function TicTacToeTableList({ socket, setShowGame, setGameId }) {
   };
 
   const joinTable = (tableId, position) => {
-    if (!socket) return; // Ensure that the socket has been initialized
+    if (!socket) return;
 
     const currentPosition = position === "X" ? "player_x_id" : "player_o_id";
     const table = tables.find(table => table.id === tableId);
@@ -64,25 +61,32 @@ function TicTacToeTableList({ socket, setShowGame, setGameId }) {
   };
 
   return (
-    <div>
-      {tables.map(table => (
-        <div key={table.id} className="table">
-          <button
-            className="btn btn-primary"
-            disabled={(isUserAlreadySeated() && table.player_x_id !== currentUser.id) || isSeatTaken(table.player_x_id)}
-            onClick={() => joinTable(table.id, "X")}>
-            {table.player_x_id ? (table.player_x_id === currentUser.id ? 'You (X)' : 'Taken') : 'X'}
-          </button>
-          <button
-            className="btn btn-secondary"
-            disabled={(isUserAlreadySeated() && table.player_o_id !== currentUser.id) || isSeatTaken(table.player_o_id)}
-            onClick={() => joinTable(table.id, "O")}>
-            {table.player_o_id ? (table.player_o_id === currentUser.id ? 'You (O)' : 'Taken') : 'O'}
-          </button>
+    <div className="d-flex flex-column align-items-center">
+      {tables.map((table, index) => (
+        <div key={table.id} className="table mb-3">
+          <h5 className="mb-2 text-center">Table #{index + 1}</h5>
+          <div className="d-flex justify-content-center align-items-center">
+            <button
+              style={{ height: '40px' }}
+              className="btn btn-dark mx-2"
+              disabled={(isUserAlreadySeated() && table.player_x_id !== currentUser.id) || isSeatTaken(table.player_x_id)}
+              onClick={() => joinTable(table.id, "X")}>
+              {table.player_x_id ? (table.player_x_id === currentUser.id ? 'You (X)' : 'Taken') : 'X'}
+            </button>
+            <img src="https://www.shareicon.net/data/512x512/2017/01/16/871735_table_512x512.png"
+              alt="Table" style={{ width: '100px', height: '80px' }} />
+            <button
+              style={{ height: '40px' }}
+              className="btn btn-dark mx-2"
+              disabled={(isUserAlreadySeated() && table.player_o_id !== currentUser.id) || isSeatTaken(table.player_o_id)}
+              onClick={() => joinTable(table.id, "O")}>
+              {table.player_o_id ? (table.player_o_id === currentUser.id ? 'You (O)' : 'Taken') : 'O'}
+            </button>
+          </div>
         </div>
       ))}
     </div>
-  );
+);
 }
 
 export default TicTacToeTableList;

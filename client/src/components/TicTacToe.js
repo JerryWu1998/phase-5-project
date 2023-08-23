@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import UserContext from '../context/UserContext.js';
 
-function TicTacToe({ gameId, socket }) {
+function TicTacToe({ gameId, socket, setShowGame }) {
   const [board, setBoard] = useState(Array(9).fill(null));
   const { currentUser } = useContext(UserContext);
   const [currentPlayerId, setCurrentPlayerId] = useState(null);
   const [playerXId, setPlayerXId] = useState(null);
   const [playerOId, setPlayerOId] = useState(null);
   const [winner, setWinner] = useState(null);
+  const [isDraw, setIsDraw] = useState(false);
 
   useEffect(() => {
     fetch(`/tictactoes/${gameId}`)
@@ -29,6 +30,7 @@ function TicTacToe({ gameId, socket }) {
 
   useEffect(() => {
     const handleBroadcastStep = (data) => {
+      if (winner || isDraw) return;
       if (data.game_id === gameId) {
         setBoard(prevBoard => {
           const newBoard = prevBoard.slice();
@@ -41,24 +43,34 @@ function TicTacToe({ gameId, socket }) {
         }
       }
     };
-    socket.on('broadcast_step', handleBroadcastStep);
 
     const handleAnnounceWinner = (data) => {
+      if (winner || isDraw) return;
       if (data.game_id === gameId) {
         setWinner(symbolForUser(data.winner_id));
       }
     };
+
+    const handleAnnounceDraw = (data) => {
+      if (winner || isDraw) return;
+      if (data.game_id === gameId) {
+        setIsDraw(true);
+      }
+    };
+
+    socket.on('broadcast_step', handleBroadcastStep);
     socket.on('announce_winner', handleAnnounceWinner);
+    socket.on('announce_draw', handleAnnounceDraw);
 
     return () => {
       socket.off('broadcast_step', handleBroadcastStep);
       socket.off('announce_winner', handleAnnounceWinner);
+      socket.off('announce_draw', handleAnnounceDraw);
     };
-  }, [gameId, playerXId, playerOId, socket, symbolForUser]);
+  }, [gameId, playerXId, playerOId, socket, symbolForUser, winner, isDraw]);
 
   const handleClick = (index) => {
-    if (!isCurrentUserTurn() || board[index]) return;
-
+    if (winner || isDraw || !isCurrentUserTurn() || board[index]) return;
     const stepData = {
       game_id: gameId,
       player_id: currentUser.id,
@@ -93,25 +105,31 @@ function TicTacToe({ gameId, socket }) {
   };
 
   const renderSquare = (index) => (
-    <button className="square" onClick={() => handleClick(index)}>
+    <button className="square btn btn-outline-primary m-2" onClick={() => handleClick(index)}>
       {board[index]}
     </button>
   );
 
   return (
-    <div>
-      {winner ? <div className="winner">Winner: {winner}</div> : null}
-      <div className="board-row">
+    <div className="container mt-5">
+      {winner ? <div className="alert alert-success text-center">Winner: {winner}</div> : null}
+      {isDraw ? <div className="alert alert-info text-center">The game is a draw!</div> : null}
+      {(winner || isDraw) ?
+        <div className="text-center my-3">
+          <button className="btn btn-secondary" onClick={() => setShowGame(false)}>Return to Table</button>
+        </div>
+        : null}
+      <div className="d-flex justify-content-center mb-2">
         {renderSquare(0)}
         {renderSquare(1)}
         {renderSquare(2)}
       </div>
-      <div className="board-row">
+      <div className="d-flex justify-content-center mb-2">
         {renderSquare(3)}
         {renderSquare(4)}
         {renderSquare(5)}
       </div>
-      <div className="board-row">
+      <div className="d-flex justify-content-center mb-2">
         {renderSquare(6)}
         {renderSquare(7)}
         {renderSquare(8)}

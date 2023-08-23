@@ -14,7 +14,7 @@ const ChatInput = ({ selectedUser }) => {
     });
     setSocket(newSocket);
     return () => {
-      newSocket.close();
+      newSocket.off();
     };
   }, []);
 

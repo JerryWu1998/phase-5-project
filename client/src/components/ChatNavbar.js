@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import UserContext from '../context/UserContext.js';
 import { Link } from 'react-router-dom';
 
-const ChatNavbar = ({ onSelectUser, newMessages, setNewMessages }) => {
+const ChatNavbar = ({ selectedUser, setSelectUser, newMessages, setNewMessages }) => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const { currentUser } = useContext(UserContext);
@@ -45,14 +45,14 @@ const ChatNavbar = ({ onSelectUser, newMessages, setNewMessages }) => {
             key={user.id} 
             className="list-group-item list-group-item-action"
             onClick={() => {
-              onSelectUser(user);
+              setSelectUser(user);
               if (newMessages.includes(user.id)) {
                 setNewMessages(prevMessages => prevMessages.filter(id => id !== user.id));
               }
             }}
           >
             {user.username}
-            {newMessages.includes(user.id) && <span className="badge bg-dark ml-2 ms-2">New</span>}
+            {newMessages.includes(user.id) && user.id !== selectedUser.id && <span className="badge bg-dark ml-2 ms-2">New</span>}
           </Link>
         ))}
       </div>

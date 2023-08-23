@@ -7,6 +7,13 @@ const MessageList = ({ selectedUser, setNewMessages }) => {
   const { currentUser } = useContext(UserContext);
   const messagesEndRef = useRef(null);
 
+  const styles = {
+    messagesSection: {
+      maxHeight: '400px',
+      overflowY: 'auto'
+    }
+  };
+
   useEffect(() => {
     if (currentUser) {
       const newSocket = io.connect('http://localhost:5555');
@@ -20,7 +27,7 @@ const MessageList = ({ selectedUser, setNewMessages }) => {
         }
       });
 
-      return () => newSocket.close();
+      return () => newSocket.off();
     }
   }, [currentUser, setNewMessages]);
 
@@ -68,24 +75,26 @@ const MessageList = ({ selectedUser, setNewMessages }) => {
       {selectedUser ? <h3 className="d-flex justify-content-center my-2">Messages with {selectedUser.username}</h3> :
         <h3 className="d-flex justify-content-center my-2">Select a user</h3>
       }
-      {selectedUser && categorizedMessages[selectedUser.id] && (
-        <div>
-          {categorizedMessages[selectedUser.id].messages.map((message, index) => {
-            const isSentByCurrentUser = message.sender_id === currentUser.id;
-            return (
-              <div key={index} className={`d-flex ${isSentByCurrentUser ? 'justify-content-end' : 'justify-content-start'} my-2`}>
-                <div
-                  className={`d-inline-block p-2 rounded ${isSentByCurrentUser ? 'bg-dark text-white' : 'bg-white text-black'}`}
-                  style={{ maxWidth: '70%' }}
-                >
-                  {message.message_content}
+      <div style={styles.messagesSection}>
+        {selectedUser && categorizedMessages[selectedUser.id] && (
+          <div>
+            {categorizedMessages[selectedUser.id].messages.map((message, index) => {
+              const isSentByCurrentUser = message.sender_id === currentUser.id;
+              return (
+                <div key={index} className={`d-flex ${isSentByCurrentUser ? 'justify-content-end' : 'justify-content-start'} my-2`}>
+                  <div
+                    className={`d-inline-block p-2 rounded ${isSentByCurrentUser ? 'bg-dark text-white' : 'bg-white text-black'}`}
+                    style={{ maxWidth: '70%' }}
+                  >
+                    {message.message_content}
+                  </div>
                 </div>
-              </div>
-            )
-          })}
-          <div ref={messagesEndRef} />
-        </div>
-      )}
+              )
+            })}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

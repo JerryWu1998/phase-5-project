@@ -1,5 +1,6 @@
 from sqlalchemy_serializer import SerializerMixin
 from config import db, bcrypt
+from sqlalchemy.orm import validates
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
@@ -11,7 +12,7 @@ class User(db.Model, SerializerMixin):
     sent_messages = db.relationship('Chat', back_populates='sender', foreign_keys='Chat.sender_id')
     received_messages = db.relationship('Chat', back_populates='receiver', foreign_keys='Chat.receiver_id')
 
-    # Define relationships to TicTacToe models
+    # Define relationships
     tic_tac_toe_as_x = db.relationship('TicTacToe', foreign_keys='TicTacToe.player_x_id', back_populates='player_x')
     tic_tac_toe_as_o = db.relationship('TicTacToe', foreign_keys='TicTacToe.player_o_id', back_populates='player_o')
     tic_tac_toe_as_current = db.relationship('TicTacToe', foreign_keys='TicTacToe.current_player_id', back_populates='current_player')
@@ -38,6 +39,9 @@ class User(db.Model, SerializerMixin):
 
     @password_hash.setter
     def password_hash(self, new_password_string):
+        if len(new_password_string) < 6 or len(new_password_string) > 16:
+            raise ValueError('Password should be between 6 to 16 characters long.')
+        
         plain_byte_obj = new_password_string.encode('utf-8')
         encrypted_hash_object = bcrypt.generate_password_hash(plain_byte_obj)
         hash_object_as_string = encrypted_hash_object.decode('utf-8')
@@ -45,6 +49,14 @@ class User(db.Model, SerializerMixin):
 
     def authenticate(self, some_string):
         return bcrypt.check_password_hash(self.password_hash, some_string.encode('utf-8'))
+    
+    @validates('username')
+    def validate_username(self, key, username):
+        if not isinstance(username, str):
+            raise ValueError('Username should be a string.')
+        if len(username) < 5 or len(username) > 16:
+            raise ValueError('Username should be between 5 to 16 characters long.')
+        return username
 
     def __repr__(self):
         return f'<User {self.id} {self.username}>'

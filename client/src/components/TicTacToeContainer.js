@@ -11,9 +11,9 @@ function TicTacToeContainer() {
 
   return (
     <div>
-      <h3>Tic Tac Toe</h3>
+      <h3 className="text-center">Tic Tac Toe</h3>
       {showGame 
-          ? <TicTacToe socket={socket} gameId={gameId} /> 
+          ? <TicTacToe socket={socket} gameId={gameId} setShowGame={setShowGame} /> 
           : <TicTacToeTableList socket={socket} setGameId={setGameId} setShowGame={setShowGame} />
       }
     </div>

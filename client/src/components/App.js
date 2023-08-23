@@ -5,6 +5,7 @@ import Login from './Login';
 import Signup from './Signup';
 import Navbar from './Navbar';
 import Home from './Home'; 
+import Profile from './Profile'; 
 import UserContext from '../context/UserContext.js';
 
 function App() {
@@ -46,10 +47,13 @@ function App() {
 
           <Switch>
             <Route path="/login">
-              {!loggedIn && <Login />}
+              <Login />
             </Route>
             <Route path="/signup">
-              {!loggedIn && <Signup />}
+              <Signup />
+            </Route>
+            <Route path="/profile"> 
+              <Profile />
             </Route>
             <Route exact path="/"> 
               <Home />

@@ -35,7 +35,7 @@ class Users(Resource):
             return make_response(new_user.to_dict(), 201)
         except Exception as e:
             db.session.rollback()
-            return make_response({"error": f"Failed to add user: {str(e)}"}, 400)
+            return make_response({"error": str(e)}, 400)
 
 class UserById(Resource):
     def get(self, id):
@@ -183,11 +183,16 @@ class TicTacToeSteps(Resource):
             )
             db.session.add(new_step)
             db.session.commit()
-            
+
+            # Broadcast the new step first
+            socketio.emit('broadcast_step', new_step.to_dict())
+
             game = TicTacToe.query.filter_by(id=data['game_id']).first()
 
             # Check for winner
             steps_of_current_player = [s.step_position for s in TicTacToeStep.query.filter_by(game_id=data['game_id'], player_id=data['player_id']).all()]
+            total_steps = len(TicTacToeStep.query.filter_by(game_id=data['game_id']).all())
+
             if check_winner(steps_of_current_player):
                 game.winner_id = data['player_id']
                 game.game_status = "completed"
@@ -195,8 +200,18 @@ class TicTacToeSteps(Resource):
                 
                 # Notify front-end about the winner via Socket.io
                 socketio.emit('announce_winner', {'game_id': new_step.game_id, 'winner_id': game.winner_id})
-
+                socketio.emit('broadcast_step', new_step.to_dict())
                 return make_response({"winner": data['player_id']})
+
+            # Check for a draw
+            elif total_steps == 9:
+                game.game_status = "draw"
+                db.session.commit()
+                
+                # Notify front-end about the draw via Socket.io
+                socketio.emit('announce_draw', {'game_id': new_step.game_id})
+                socketio.emit('broadcast_step', new_step.to_dict())
+                return make_response({"result": "draw"})
 
             # Switch the current player
             if game.current_player_id == game.player_x_id:
@@ -205,13 +220,17 @@ class TicTacToeSteps(Resource):
                 game.current_player_id = game.player_x_id
             db.session.commit()
 
-            socketio.emit('broadcast_step', new_step.to_dict())
+            # Then, broadcast the current player
             socketio.emit('update_game', {'game_id': new_step.game_id, 'current_player_id': game.current_player_id})
 
             return make_response(new_step.to_dict(), 201)
 
         except Exception as e:
             return make_response({"error": "Error while making a step: " + str(e)}, 400)
+
+# ... [Rest of the code remains unchanged]
+
+        
 def check_winner(steps_of_current_player):
     winning_combinations = [
         [1, 2, 3], [4, 5, 6], [7, 8, 9],
@@ -263,7 +282,6 @@ def handle_join_table(data):
 
     table = TicTacToeTable.query.filter_by(id=table_id).first()
     if not table:
-        # 返回错误消息
         socketio.emit('join_table_error', {'message': 'Table not found.'})
         return
 
@@ -287,25 +305,32 @@ def handle_join_table(data):
 
     db.session.commit()
 
-    # 检查两个位置是否都有玩家
+    # Check players
     if table.player_x_id and table.player_o_id:
-        # 创建新的井字棋游戏
+        # Create game
         new_game = TicTacToe(
             player_x_id=table.player_x_id,
             player_o_id=table.player_o_id,
             current_player_id=table.player_x_id,
             table_id=table.id
         )
+
+        table.player_o_id = None
+        table.player_x_id = None
+
         db.session.add(new_game)
         db.session.commit()
 
-        # 使用Socket.io通知玩家游戏已开始
+        # Notify frontend that game started
         socketio.emit('game_started', {
             'table_id': table_id,
             'game_id': new_game.id
         })
 
     socketio.emit('update_table', table.to_dict())
+
+
+    
 
 
 if __name__ == "__main__":

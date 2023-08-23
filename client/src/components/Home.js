@@ -1,11 +1,10 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import UserContext from '../context/UserContext.js';
 import ChatContainer from './ChatContainer';
 import TicTacToeContainer from './TicTacToeContainer.js';
 
 function Home() {
   const { loggedIn } = useContext(UserContext);
-  const [selectedUser, setSelectedUser] = useState(null);
 
   const boxStyle = {
     backgroundColor: 'rgba(255, 255, 255, 0.85)',
@@ -32,7 +31,7 @@ function Home() {
           <div className="chat-section my-3" style={{ ...boxStyle, width: '800px' }}>
             <h2 className='text-center'>Chat</h2>
             <hr style={{ width: '100%' }} />
-            <ChatContainer selectedUser={selectedUser} setSelectedUser={setSelectedUser} />
+            <ChatContainer />
           </div>
         </div>
       )}
