@@ -144,7 +144,7 @@ def logout():
 # TicTacToe Resource
 class TicTacToeGames(Resource):
     def get(self):
-        return make_response([g.to_dict() for g in TicTacToe.query.all()])
+        return make_response([g.to_dict() for g in TicTacToe.query.all()], 200)
 
     def post(self):
         data = request.get_json()
@@ -173,6 +173,9 @@ api.add_resource(TicTacToeGameById, '/tictactoes/<int:id>')
 
 # TicTacToeStep Resource
 class TicTacToeSteps(Resource):
+    def get(self):
+        return make_response([s.to_dict() for s in TicTacToeStep.query.all()], 200)
+    
     def post(self):
         data = request.get_json()
         try:
@@ -271,7 +274,7 @@ class TicTacToeTableById(Resource):
 api.add_resource(TicTacToeTables, '/tictactoetables')
 api.add_resource(TicTacToeTableById, '/tictactoetables/<int:id>')
 
-# For 2 users creating a game
+# For two users creating a game
 @socketio.on('join_table')
 def handle_join_table(data):
     table_id = data['table_id']

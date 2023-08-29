@@ -5,12 +5,17 @@ function TicTacToe({ gameId, socket }) {
   const [board, setBoard] = useState(Array(9).fill(null));
   const { currentUser, setShowGame } = useContext(UserContext);
   const [currentPlayerId, setCurrentPlayerId] = useState(null);
+  
   const [playerXId, setPlayerXId] = useState(null);
   const [playerOId, setPlayerOId] = useState(null);
+
+  const [playerXUsername, setPlayerXUsername] = useState(null);
+  const [playerOUsername, setPlayerOUsername] = useState(null);
+
   const [winner, setWinner] = useState(null);
   const [isDraw, setIsDraw] = useState(false);
 
-  const nextPlayerSymbol = currentPlayerId === playerXId ? 'X' : 'O';
+  const nextPlayerSymbol = currentPlayerId === playerXId ? `${playerXUsername} (X)` : `${playerOUsername} (O)`;
 
   useEffect(() => {
     fetch(`/tictactoes/${gameId}`)
@@ -18,7 +23,9 @@ function TicTacToe({ gameId, socket }) {
       .then(data => {
         setCurrentPlayerId(data.current_player_id);
         setPlayerXId(data.player_x_id);
+        setPlayerXUsername(data.player_x.username)
         setPlayerOId(data.player_o_id);
+        setPlayerOUsername(data.player_o.username)
       });
   }, [gameId]);
 
@@ -114,7 +121,7 @@ function TicTacToe({ gameId, socket }) {
 
   return (
     <div className="container mt-5">
-        {winner ? <div className="alert alert-success text-center">Winner: {winner}</div> : null}
+        {winner ? <div className="alert alert-success text-center">Winner: {winner === 'X' ? playerXUsername : playerOUsername}</div> : null}
         {isDraw ? <div className="alert alert-info text-center">The game is a draw!</div> : null}
         {!winner && !isDraw ? 
             <div className="alert alert-primary text-center">Next move: {nextPlayerSymbol}</div> : null}

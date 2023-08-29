@@ -71,7 +71,7 @@ function TicTacToeTableList({ socket, setGameId }) {
               className="btn btn-dark mx-2"
               disabled={(isUserAlreadySeated() && table.player_x_id !== currentUser.id) || isSeatTaken(table.player_x_id)}
               onClick={() => joinTable(table.id, "X")}>
-              {table.player_x_id ? (table.player_x_id === currentUser.id ? 'You (X)' : 'Taken') : 'X'}
+              {table.player_x_id ? `${table.player_x.username} (X)` : 'X'}
             </button>
             <img src="https://www.shareicon.net/data/512x512/2017/01/16/871735_table_512x512.png"
               alt="Table" style={{ width: '100px', height: '80px' }} />
@@ -80,7 +80,7 @@ function TicTacToeTableList({ socket, setGameId }) {
               className="btn btn-dark mx-2"
               disabled={(isUserAlreadySeated() && table.player_o_id !== currentUser.id) || isSeatTaken(table.player_o_id)}
               onClick={() => joinTable(table.id, "O")}>
-              {table.player_o_id ? (table.player_o_id === currentUser.id ? 'You (O)' : 'Taken') : 'O'}
+              {table.player_o_id ? `${table.player_o.username} (O)` : 'O'}
             </button>
           </div>
         </div>
