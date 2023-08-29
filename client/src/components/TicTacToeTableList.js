@@ -3,7 +3,7 @@ import UserContext from '../context/UserContext.js';
 
 function TicTacToeTableList({ socket, setGameId }) {
   const [tables, setTables] = useState([]);
-  const { currentUser, setShowGame } = useContext(UserContext);
+  const { currentUser, setShowTGame } = useContext(UserContext);
 
   useEffect(() => {
     fetch('/tictactoetables')
@@ -21,19 +21,19 @@ function TicTacToeTableList({ socket, setGameId }) {
         prevTables.map(table => table.id === updatedTable.id ? updatedTable : table)
       );
       if (updatedTable.player_x_id && updatedTable.player_o_id) {
-        setShowGame(true);
+        setShowTGame(true);
       }
     });
 
     socket.on("game_started", (data) => {
       setGameId(data.game_id);
-      setShowGame(true);
+      setShowTGame(true);
     });
 
     return () => {
       socket.off();
     };
-  }, [setShowGame, socket, setGameId]);
+  }, [setShowTGame, socket, setGameId]);
 
   const isUserAlreadySeated = () => {
     return tables.some(table => table.player_x_id === currentUser.id || table.player_o_id === currentUser.id);

@@ -11,7 +11,7 @@ import UserContext from '../context/UserContext.js';
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null); 
-  const [showGame, setShowGame] = useState(false);
+  const [showTGame, setShowTGame] = useState(false);
 
   useEffect(() => {
     checkLoginStatus();
@@ -34,7 +34,7 @@ function App() {
   const bgImageUrl = "https://wallpapercave.com/wp/wp9067458.jpg";
 
   return (
-    <UserContext.Provider value={{ loggedIn, setLoggedIn, currentUser, setCurrentUser, showGame, setShowGame }}>
+    <UserContext.Provider value={{ loggedIn, setLoggedIn, currentUser, setCurrentUser, showTGame, setShowTGame }}>
       <Router>
         <div className="App" style={{ 
           backgroundImage: `url(${bgImageUrl})`, 

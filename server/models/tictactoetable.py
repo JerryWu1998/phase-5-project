@@ -14,18 +14,10 @@ class TicTacToeTable(db.Model, SerializerMixin):
     games = db.relationship("TicTacToe", back_populates="table")
 
     serialize_rules = (
-        "-player_x.tic_tac_toe_as_x",
-        "-player_x.tic_tac_toe_as_o",
-        "-player_x.tic_tac_toe_as_current",
         "-player_x.sent_messages",
         "-player_x.received_messages",
-        "-player_x.game_steps",
-        "-player_o.tic_tac_toe_as_x",
-        "-player_o.tic_tac_toe_as_o",
-        "-player_o.tic_tac_toe_as_current",
         "-player_o.sent_messages",
         "-player_o.received_messages",
-        "-player_o.game_steps",
         "-games",
     )
 

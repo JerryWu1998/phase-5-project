@@ -7,12 +7,12 @@ import UserContext from '../context/UserContext.js';
 function TicTacToeContainer() {
   const [gameId, setGameId] = useState(null); 
   const socket = socketIOClient("/");
-  const { showGame } = useContext(UserContext);
+  const { showTGame } = useContext(UserContext);
 
   return (
     <div>
       <h3 className="text-center">Tic Tac Toe</h3>
-      {showGame 
+      {showTGame 
           ? <TicTacToe socket={socket} gameId={gameId} /> 
           : <TicTacToeTableList socket={socket} setGameId={setGameId} />
       }

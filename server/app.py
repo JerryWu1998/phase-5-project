@@ -6,7 +6,7 @@
 from flask import request, make_response, session
 from flask_restful import Resource
 from config import app, db, api, socketio
-from models import User, Chat, TicTacToe, TicTacToeStep, TicTacToeTable
+from models import User, Chat, TicTacToe, TicTacToeStep, TicTacToeTable, Gomoku, GomokuStep, GomokuTable
 
 @app.route("/")
 def index():
@@ -274,7 +274,7 @@ class TicTacToeTableById(Resource):
 api.add_resource(TicTacToeTables, '/tictactoetables')
 api.add_resource(TicTacToeTableById, '/tictactoetables/<int:id>')
 
-# For two users creating a game
+# For two users creating a Tictactoe game
 @socketio.on('join_table')
 def handle_join_table(data):
     table_id = data['table_id']
@@ -329,6 +329,213 @@ def handle_join_table(data):
         })
 
     socketio.emit('update_table', table.to_dict())
+
+
+# Gomoku Resource
+class GomokuGames(Resource):
+    def get(self):
+        return make_response([g.to_dict() for g in Gomoku.query.all()], 200)
+
+    def post(self):
+        data = request.get_json()
+        try:
+            new_game = Gomoku(
+                player_black_id=data['player_black_id'],
+                player_white_id=data['player_white_id'],
+                current_player_id=data['current_player_id']
+            )
+            db.session.add(new_game)
+            db.session.commit()
+            return make_response(new_game.to_dict(), 201)
+        except Exception as e:
+            return make_response({"error": "Error while creating game: " + str(e)}, 400)
+
+class GomokuGameById(Resource):
+    def get(self, id):
+        game = Gomoku.query.filter_by(id=id).first()
+        if not game:
+            return make_response({"message": "Game not found"}, 404)
+        return make_response(game.to_dict())
+
+api.add_resource(GomokuGames, '/gomokus')
+api.add_resource(GomokuGameById, '/gomokus/<int:id>')
+
+
+# GomokuStep Resource
+class GomokuSteps(Resource):
+    def get(self):
+        return make_response([s.to_dict() for s in GomokuStep.query.all()], 200)
+
+    def post(self):
+        data = request.get_json()
+        try:
+            new_step = GomokuStep(
+                game_id=data['game_id'],
+                player_id=data['player_id'],
+                step_position=data['step_position']
+            )
+            db.session.add(new_step)
+            db.session.commit()
+
+            # Broadcast the new step first
+            socketio.emit('gomoku_broadcast_step', new_step.to_dict())
+
+            game = Gomoku.query.filter_by(id=data['game_id']).first()
+
+            # Check for winner
+            steps_of_current_player = [
+                s.step_position for s in GomokuStep.query.filter_by(
+                    game_id=data['game_id'], 
+                    player_id=data['player_id']
+                ).all()
+            ]
+            total_steps = len(GomokuStep.query.filter_by(game_id=data['game_id']).all())
+
+            if check_winner_gomoku(steps_of_current_player):
+                game.winner_id = data['player_id']
+                game.game_status = "completed"
+                db.session.commit()
+
+                # Notify front-end about the winner
+                socketio.emit('gomoku_announce_winner', {'game_id': new_step.game_id, 'winner_id': game.winner_id})
+                socketio.emit('gomoku_broadcast_step', new_step.to_dict())
+                return make_response({"winner": data['player_id']})
+
+            # Check for a draw
+            elif total_steps == 225:
+                game.game_status = "draw"
+                db.session.commit()
+
+                # Notify front-end about the draw
+                socketio.emit('gomoku_announce_draw', {'game_id': new_step.game_id})
+                socketio.emit('gomoku_broadcast_step', new_step.to_dict())
+                return make_response({"result": "draw"})
+
+            # Switch the current player
+            if game.current_player_id == game.player_black_id:
+                game.current_player_id = game.player_white_id
+            else:
+                game.current_player_id = game.player_black_id
+            db.session.commit()
+
+            # Broadcast the current player
+            socketio.emit('gomoku_update_game', {'game_id': new_step.game_id, 'current_player_id': game.current_player_id})
+
+            return make_response(new_step.to_dict(), 201)
+
+        except Exception as e:
+            return make_response({"error": "Error while making a step: " + str(e)}, 400)
+
+def check_winner_gomoku(steps_of_current_player):
+    board = [[0 for _ in range(15)] for _ in range(15)]
+
+    for pos in steps_of_current_player:
+        x, y = divmod(pos, 15)
+        board[x][y] = 1
+
+    for i in range(15):
+        for j in range(11):
+            if all(board[i][j+k] == 1 for k in range(5)):
+                return True
+            if all(board[j+k][i] == 1 for k in range(5)):
+                return True
+
+    for i in range(11):
+        for j in range(11):
+            if all(board[i+k][j+k] == 1 for k in range(5)):
+                return True
+            if all(board[i+k][j+4-k] == 1 for k in range(5)):
+                return True
+
+    return False
+
+api.add_resource(GomokuSteps, '/gomokusteps')
+
+
+# GomokuTable Resource
+class GomokuTables(Resource):
+    def get(self):
+        return make_response([t.to_dict() for t in GomokuTable.query.all()])
+
+    def post(self):
+        data = request.get_json()
+        try:
+            new_table = GomokuTable(
+                player_black_id=data['player_black_id'],
+                player_white_id=data['player_white_id']
+            )
+            db.session.add(new_table)
+            db.session.commit()
+            return make_response(new_table.to_dict(), 201)
+        except Exception as e:
+            return make_response({"error": "Error while creating table: " + str(e)}, 400)
+
+class GomokuTableById(Resource):
+    def get(self, id):
+        table = GomokuTable.query.filter_by(id=id).first()
+        if not table:
+            return make_response({"message": "Table not found"}, 404)
+        return make_response(table.to_dict())
+
+# Assuming you're using Flask-RESTful's Api object named 'api'
+api.add_resource(GomokuTables, '/gomokutables')
+api.add_resource(GomokuTableById, '/gomokutables/<int:id>')
+
+# For two users creating a Gomoku game
+@socketio.on('gomoku_join_table')
+def handle_gomoku_join_table(data):
+    table_id = data['table_id']
+    position = data['position']
+    user_id = data['user_id']
+
+    table = GomokuTable.query.filter_by(id=table_id).first()
+    if not table:
+        socketio.emit('gomoku_join_table_error', {'message': 'Table not found.'})
+        return
+
+    if position == "player_black_id":
+        if table.player_black_id == user_id:
+            table.player_black_id = None
+        elif not table.player_black_id:
+            table.player_black_id = user_id
+        else:
+            socketio.emit('gomoku_join_table_error', {'message': 'Position Black already taken.'})
+            return
+
+    elif position == "player_white_id":
+        if table.player_white_id == user_id:
+            table.player_white_id = None
+        elif not table.player_white_id:
+            table.player_white_id = user_id
+        else:
+            socketio.emit('gomoku_join_table_error', {'message': 'Position White already taken.'})
+            return
+
+    db.session.commit()
+
+    # Check players
+    if table.player_black_id and table.player_white_id:
+        # Create game
+        new_game = Gomoku(
+            player_black_id=table.player_black_id,
+            player_white_id=table.player_white_id,
+            current_player_id=table.player_black_id,
+            table_id=table.id
+        )
+
+        table.player_black_id = None
+        table.player_white_id = None
+
+        db.session.add(new_game)
+        db.session.commit()
+
+        # Notify frontend that game started
+        socketio.emit('gomoku_game_started', {
+            'table_id': table_id,
+            'game_id': new_game.id
+        })
+
+    socketio.emit('gomoku_update_table', table.to_dict())
 
 
 if __name__ == "__main__":

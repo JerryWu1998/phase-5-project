@@ -3,7 +3,7 @@ import UserContext from '../context/UserContext.js';
 
 function TicTacToe({ gameId, socket }) {
   const [board, setBoard] = useState(Array(9).fill(null));
-  const { currentUser, setShowGame } = useContext(UserContext);
+  const { currentUser, setShowTGame } = useContext(UserContext);
   const [currentPlayerId, setCurrentPlayerId] = useState(null);
   
   const [playerXId, setPlayerXId] = useState(null);
@@ -127,7 +127,7 @@ function TicTacToe({ gameId, socket }) {
             <div className="alert alert-primary text-center">Next move: {nextPlayerSymbol}</div> : null}
         {(winner || isDraw) ?
             <div className="text-center my-3">
-                <button className="btn btn-secondary" onClick={() => setShowGame(false)}>Return to Table</button>
+                <button className="btn btn-secondary" onClick={() => setShowTGame(false)}>Return to Table</button>
             </div>
             : null}
         <div className="d-flex justify-content-center mb-2">

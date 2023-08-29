@@ -5,7 +5,7 @@ from random import choice as rc, sample
 
 # Local imports
 from app import app, db
-from models import User, Chat, TicTacToe, TicTacToeStep, TicTacToeTable
+from models import User, Chat, TicTacToe, TicTacToeStep, TicTacToeTable, Gomoku, GomokuStep, GomokuTable
 
 def seed_database():
     """A function to seed the database."""
@@ -16,6 +16,9 @@ def seed_database():
     db.session.query(TicTacToe).delete()
     db.session.query(Chat).delete()
     db.session.query(User).delete()
+    db.session.query(Gomoku).delete()
+    db.session.query(GomokuStep).delete()
+    db.session.query(GomokuTable).delete()
 
     # Generating users
     users = []
@@ -57,6 +60,26 @@ def seed_database():
         db.session.add(table)
     db.session.commit()
 
+    # Generating Gomoku games
+    gomoku_games = []
+    for i in range(2):
+        gomoku_game = Gomoku(
+            player_black_id=users[i].id,
+            player_white_id=users[(i + 1) % 3].id,
+            current_player_id=users[i].id,
+            game_status="completed"
+        )
+        gomoku_games.append(gomoku_game)
+        db.session.add(gomoku_game)
+    db.session.commit()
+
+    # Generating Gomoku tables
+    for i in range(5):
+        gomoku_table = GomokuTable()
+        gomoku_table.games.append(gomoku_games[i % 2])
+        db.session.add(gomoku_table)
+    db.session.commit()
+    
     print("Seeding completed!")
     
 

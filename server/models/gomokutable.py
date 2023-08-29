@@ -14,8 +14,10 @@ class GomokuTable(db.Model, SerializerMixin):
     games = db.relationship("Gomoku", back_populates="table")
 
     serialize_rules = (
-        "-player_black",
-        "-player_white",
+        "-player_black.sent_messages",
+        "-player_black.received_messages",
+        "-player_white.sent_messages",
+        "-player_white.received_messages",
         "-games",
     )
 

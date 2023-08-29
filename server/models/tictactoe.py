@@ -23,27 +23,15 @@ class TicTacToe(db.Model, SerializerMixin):
         return f"<TicTacToe Game {self.id}>"
 
     serialize_rules = (
-        "-player_x.tic_tac_toe_as_x",
-        "-player_x.tic_tac_toe_as_o",
-        "-player_x.tic_tac_toe_as_current",
         "-player_x.sent_messages",
         "-player_x.received_messages",
-        "-player_x.game_steps",
-        "-player_o.tic_tac_toe_as_x",
-        "-player_o.tic_tac_toe_as_o",
-        "-player_o.tic_tac_toe_as_current",
         "-player_o.sent_messages",
         "-player_o.received_messages",
-        "-player_o.game_steps",
-        "-current_player.tic_tac_toe_as_x",
-        "-current_player.tic_tac_toe_as_o",
-        "-current_player.tic_tac_toe_as_current",
         "-current_player.sent_messages",
         "-current_player.received_messages",
-        "-current_player.game_steps",
         "-steps.game",
         "-steps.player",
-        "-table.games",
+        "-table",
     )
 
     def __repr__(self):
