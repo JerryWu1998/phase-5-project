@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import UserContext from '../context/UserContext.js';
 import ChatContainer from './ChatContainer';
-import TicTacToeContainer from './TicTacToeContainer.js';
+import GameContainer from './GameContainer.js';
 
 function Home() {
   const { loggedIn } = useContext(UserContext);
@@ -25,7 +25,7 @@ function Home() {
           <div className="chess-section my-3" style={{ ...boxStyle, width: '800px' }}>
             <h2 className='text-center'>Play</h2>
             <hr style={{ width: '100%', maxWidth: '800px' }} />
-            <TicTacToeContainer />
+            <GameContainer />
           </div>
 
           <div className="chat-section my-3" style={{ ...boxStyle, width: '800px' }}>
