@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import UserContext from '../context/UserContext.js';
 
 function Profile() {
@@ -9,6 +9,58 @@ function Profile() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
+  const [gameRecords, setGameRecords] = useState([]);
+  const [gomokuRecords, setGomokuRecords] = useState([]);
+
+  // TicTacToe records
+  useEffect(() => {
+    const fetchGameRecords = async () => {
+      try {
+        const response = await fetch('/tictactoes');
+        const data = await response.json();
+
+        if (response.ok) {
+          const filteredGames = data.filter(game =>
+            game.player_x_id === currentUser.id || game.player_o_id === currentUser.id
+          );
+          setGameRecords(filteredGames);
+        } else {
+          setError('Failed to fetch game records');
+        }
+      } catch (error) {
+        setError('An error occurred while fetching game records');
+      }
+    };
+
+    if (currentUser) {
+      fetchGameRecords();
+    }
+  }, [currentUser]);
+
+  // Gomoku records
+  useEffect(() => {
+    const fetchGomokuRecords = async () => {
+      try {
+        const response = await fetch('/gomokus');
+        const data = await response.json();
+
+        if (response.ok) {
+          const filteredGames = data.filter(game =>
+            game.player_black_id === currentUser.id || game.player_white_id === currentUser.id
+          );
+          setGomokuRecords(filteredGames);
+        } else {
+          setError('Failed to fetch Gomoku game records');
+        }
+      } catch (error) {
+        setError('An error occurred while fetching Gomoku game records');
+      }
+    };
+
+    if (currentUser) {
+      fetchGomokuRecords();
+    }
+  }, [currentUser]);
 
   const handlePasswordChange = async () => {
     setSuccess('');
@@ -18,9 +70,12 @@ function Profile() {
       setError("New password must be between 6 to 16 characters.");
       return;
     }
-
     if (newPassword !== confirmPassword) {
       setError("New password and confirm password do not match.");
+      return;
+    }
+    if (newPassword === oldPassword) {
+      setError("New password cannot be the same as the old password.");
       return;
     }
 
@@ -47,6 +102,7 @@ function Profile() {
     }
   };
 
+
   const handleCancelChange = () => {
     setOldPassword('');
     setNewPassword('');
@@ -61,7 +117,7 @@ function Profile() {
     padding: '20px',
     borderRadius: '10px',
     margin: 'auto',
-    textAlign: 'center', 
+    textAlign: 'center',
   };
 
   const inputStyle = {
@@ -77,10 +133,12 @@ function Profile() {
       <hr />
       <h4>Username: {currentUser ? currentUser.username : 'Loading...'}</h4>
 
-      <div className="mt-4" style={{ textAlign: 'center' }}> 
+      <div className="mt-4" style={{ textAlign: 'center' }}>
         {showChangePasswordForm ? (
-          <>
+          <div>
             <h4>Change Password</h4>
+            {error && <div className="alert alert-danger" role="alert">{error}</div>}
+            {success && <div className="alert alert-success" role="alert">{success}</div>}
             <div className="form-group" style={inputStyle}>
               <input
                 type="password"
@@ -108,15 +166,72 @@ function Profile() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
-            {error && <div className="alert alert-danger" role="alert">{error}</div>}
-            {success && <div className="alert alert-success" role="alert">{success}</div>}
             <button className="btn btn-danger" onClick={handlePasswordChange}>Change Password</button>
             <button className="btn btn-secondary ms-3" onClick={handleCancelChange}>Cancel Change</button>
-          </>
+          </div>
         ) : (
           <button className="btn btn-dark" onClick={() => setShowChangePasswordForm(true)}>Change Password</button>
         )}
       </div>
+      {/* TicTacToe records */}
+      <h4 className='mt-5'>TicTacToe Records</h4>
+      <div className="mt-2" style={{ padding: '20px', maxHeight: '400px', margin: 'auto', overflowY: 'auto' }}>
+        {gameRecords.length ? (
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th style={{ width: '33%', textAlign: 'center' }}>Player X</th>
+                <th style={{ width: '33%', textAlign: 'center' }}>Player O</th>
+                <th style={{ width: '33%', textAlign: 'center' }}>Results</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gameRecords.map((record, index) => (
+                <tr key={index}>
+                  <td style={{ textAlign: 'center' }}>{record.player_x.username}</td>
+                  <td style={{ textAlign: 'center' }}>{record.player_o.username}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    {record.winner_id === currentUser.id ? 'Won' : record.winner_id ? 'Lost' : 'N/A'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No game records found.</p>
+        )}
+      </div>
+
+      {/* Gomoku Records */}
+      <h4 className='mt-2'>Gomoku Records</h4>
+      <div className="mt-2" style={{ padding: '20px', maxHeight: '400px', margin: 'auto', overflowY: 'auto' }}>
+        {gomokuRecords.length ? (
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th style={{ width: '33%', textAlign: 'center' }}>Player Black</th>
+                <th style={{ width: '33%', textAlign: 'center' }}>Player White</th>
+                <th style={{ width: '33%', textAlign: 'center' }}>Results</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gomokuRecords.map((record, index) => (
+                <tr key={index}>
+                  <td style={{ textAlign: 'center' }}>{record.player_black.username}</td>
+                  <td style={{ textAlign: 'center' }}>{record.player_white.username}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    {record.winner_id === currentUser.id ? 'Won' : record.winner_id ? 'Lost' : 'N/A'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No Gomoku game records found.</p>
+        )}
+      </div>
+
+
     </div>
   );
 }

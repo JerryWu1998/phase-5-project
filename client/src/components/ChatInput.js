@@ -46,7 +46,7 @@ const ChatInput = ({ selectedUser }) => {
         placeholder="Type a message..."
         disabled={!selectedUser}
       />
-      <button type="submit" className="btn btn-outline-dark ms-2" disabled={!selectedUser}>Send</button>
+      <button type="submit" className="btn btn-light ms-2 border border-dark" disabled={!selectedUser}>Send</button>
     </form>
   );
 };

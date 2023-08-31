@@ -5,7 +5,7 @@ function TicTacToe({ gameId, socket }) {
   const [board, setBoard] = useState(Array(9).fill(null));
   const { currentUser, setShowTGame } = useContext(UserContext);
   const [currentPlayerId, setCurrentPlayerId] = useState(null);
-  
+
   const [playerXId, setPlayerXId] = useState(null);
   const [playerOId, setPlayerOId] = useState(null);
 
@@ -114,39 +114,45 @@ function TicTacToe({ gameId, socket }) {
   };
 
   const renderSquare = (index) => (
-    <button className="square btn btn-outline-dark m-2" style={{ width: '40px', height: '40px' }} onClick={() => handleClick(index)}>
+    <button className="square btn btn-outline-dark" style={{
+      width: '60px', height: '60px', borderRadius: '0%',
+      fontWeight: 'bold', fontSize: '30px'
+    }} onClick={() => handleClick(index)}>
       {board[index]}
     </button>
   );
 
   return (
     <div className="container mt-5">
-        {winner ? <div className="alert alert-success text-center">Winner: {winner === 'X' ? playerXUsername : playerOUsername}</div> : null}
-        {isDraw ? <div className="alert alert-info text-center">The game is a draw!</div> : null}
-        {!winner && !isDraw ? 
-            <div className="alert alert-dark text-center">Next move: {nextPlayerSymbol}</div> : null}
-        {(winner || isDraw) ?
-            <div className="text-center my-3">
-                <button className="btn btn-dark" onClick={() => setShowTGame(false)}>Return to Table</button>
-            </div>
-            : null}
-        <div className="d-flex justify-content-center mb-2">
-            {renderSquare(0)}
-            {renderSquare(1)}
-            {renderSquare(2)}
+      {winner ? <div className="alert alert-success text-center">Winner: {winner === 'X' ? playerXUsername : playerOUsername}</div> : null}
+      {isDraw ? <div className="alert alert-info text-center">The game is a draw!</div> : null}
+      {!winner && !isDraw ?
+        <div className="alert alert-light text-center" style={{ borderColor: 'black', color: 'black' }}>
+          Next move: {nextPlayerSymbol}
         </div>
-        <div className="d-flex justify-content-center mb-2">
-            {renderSquare(3)}
-            {renderSquare(4)}
-            {renderSquare(5)}
+        : null}
+      {(winner || isDraw) ?
+        <div className="text-center my-3">
+          <button className="btn btn-dark" onClick={() => setShowTGame(false)}>Return to Table</button>
         </div>
-        <div className="d-flex justify-content-center mb-2">
-            {renderSquare(6)}
-            {renderSquare(7)}
-            {renderSquare(8)}
-        </div>
+        : null}
+      <div className="d-flex justify-content-center">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
+      </div>
+      <div className="d-flex justify-content-center">
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
+      </div>
+      <div className="d-flex justify-content-center">
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
     </div>
-);
+  );
 }
 
 export default TicTacToe;

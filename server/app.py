@@ -218,7 +218,6 @@ class TicTacToeSteps(Resource):
                 game.game_status = "completed"
                 db.session.commit()
                 
-                # Notify frontend about the winner
                 socketio.emit('announce_winner', {'game_id': new_step.game_id, 'winner_id': game.winner_id})
                 socketio.emit('broadcast_step', new_step.to_dict())
                 return make_response({"winner": data['player_id']})
@@ -228,7 +227,6 @@ class TicTacToeSteps(Resource):
                 game.game_status = "draw"
                 db.session.commit()
                 
-                # Notify frontend about the draw
                 socketio.emit('announce_draw', {'game_id': new_step.game_id})
                 socketio.emit('broadcast_step', new_step.to_dict())
                 return make_response({"result": "draw"})
@@ -240,7 +238,6 @@ class TicTacToeSteps(Resource):
                 game.current_player_id = game.player_x_id
             db.session.commit()
 
-            # Broadcast the current player
             socketio.emit('update_game', {'game_id': new_step.game_id, 'current_player_id': game.current_player_id})
 
             return make_response(new_step.to_dict(), 201)
@@ -339,7 +336,6 @@ def handle_join_table(data):
         db.session.add(new_game)
         db.session.commit()
 
-        # Notify frontend that game started
         socketio.emit('game_started', {
             'table_id': table_id,
             'game_id': new_game.id
@@ -412,7 +408,6 @@ class GomokuSteps(Resource):
                 game.game_status = "completed"
                 db.session.commit()
 
-                # Notify frontend about the winner
                 socketio.emit('gomoku_announce_winner', {'game_id': new_step.game_id, 'winner_id': game.winner_id})
                 socketio.emit('gomoku_broadcast_step', new_step.to_dict())
                 return make_response({"winner": data['player_id']})
@@ -422,7 +417,6 @@ class GomokuSteps(Resource):
                 game.game_status = "draw"
                 db.session.commit()
 
-                # Notify frontend about the draw
                 socketio.emit('gomoku_announce_draw', {'game_id': new_step.game_id})
                 socketio.emit('gomoku_broadcast_step', new_step.to_dict())
                 return make_response({"result": "draw"})

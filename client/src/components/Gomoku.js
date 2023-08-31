@@ -117,13 +117,20 @@ function Gomoku({ gameId, socket }) {
   const renderSquare = (index) => {
     let content;
     if (board[index] === 'Black') {
-      content = <div style={{ backgroundColor: 'black', width: '100%', height: '100%', borderRadius: '50%' }}></div>;
+      content = <div style={{ backgroundColor: 'black', width: '85%', height: '85%', borderRadius: '50%' }}></div>;
     } else if (board[index] === 'White') {
-      content = <div style={{ backgroundColor: 'white', width: '100%', height: '100%', borderRadius: '50%', border: '1px solid black' }}></div>;
+      content = <div style={{
+        backgroundColor: 'white', width: '85%', height: '85%',
+        borderRadius: '50%', border: '1px solid black'
+      }}></div>;
     }
 
     return (
-      <button className="square btn btn-outline-dark" style={{ width: '30px', height: '30px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0', margin: '0', borderRadius: '0%' }} onClick={() => handleClick(index)}>
+      <button className="square btn btn-outline-dark"
+        style={{
+          width: '30px', height: '30px', display: 'flex', justifyContent: 'center',
+          alignItems: 'center', padding: '0', margin: '0', borderRadius: '0%'
+        }} onClick={() => handleClick(index)}>
         {content}
       </button>
     );
@@ -145,7 +152,8 @@ function Gomoku({ gameId, socket }) {
     <div className="container mt-5">
       {winner ? <div className="alert alert-success text-center">Winner: {winner === 'Black' ? playerBlackUsername : playerWhiteUsername}</div> : null}
       {isDraw ? <div className="alert alert-info text-center">The game is a draw!</div> : null}
-      {!winner && !isDraw ? <div className="alert alert-dark text-center">Next move: {nextPlayerSymbol}</div> : null}
+      {!winner && !isDraw ? <div className="alert alert-light text-center" style={{ borderColor: 'black', color: 'black' }}>
+        Next move: {nextPlayerSymbol}</div> : null}
       {(winner || isDraw) ?
         <div className="text-center my-3">
           <button className="btn btn-dark" onClick={() => setShowGGame(false)}>Return to Table</button>
