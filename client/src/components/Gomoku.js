@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import UserContext from '../context/UserContext.js';
 
 function Gomoku({ gameId, socket }) {
-  const boardSize = 225; // 15x15 board
+  const boardSize = 225;
   const [board, setBoard] = useState(Array(boardSize).fill(null));
   const { currentUser, setShowGGame } = useContext(UserContext);
   const [currentPlayerId, setCurrentPlayerId] = useState(null);
@@ -10,8 +10,13 @@ function Gomoku({ gameId, socket }) {
   const [playerBlackId, setPlayerBlackId] = useState(null);
   const [playerWhiteId, setPlayerWhiteId] = useState(null);
 
+  const [playerBlackUsername, setPlayerBlackUsername] = useState(null);
+  const [playerWhiteUsername, setPlayerWhiteUsername] = useState(null);
+
   const [winner, setWinner] = useState(null);
   const [isDraw, setIsDraw] = useState(false);
+
+  const nextPlayerSymbol = currentPlayerId === playerBlackId ? `${playerBlackUsername} (Black)` : `${playerWhiteUsername} (White)`;
 
   useEffect(() => {
     fetch(`/gomokus/${gameId}`)
@@ -19,7 +24,9 @@ function Gomoku({ gameId, socket }) {
       .then(data => {
         setCurrentPlayerId(data.current_player_id);
         setPlayerBlackId(data.player_black_id);
+        setPlayerBlackUsername(data.player_black.username);
         setPlayerWhiteId(data.player_white_id);
+        setPlayerWhiteUsername(data.player_white.username);
       });
   }, [gameId]);
 
@@ -85,33 +92,42 @@ function Gomoku({ gameId, socket }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(stepData)
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.error) {
-        console.error(data.error);
-        return;
-      }
-      setBoard(prevBoard => {
-        const newBoard = [...prevBoard];
-        newBoard[index] = symbolForUser(data.player_id);
-        return newBoard;
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          console.error(data.error);
+          return;
+        }
+        setBoard(prevBoard => {
+          const newBoard = [...prevBoard];
+          newBoard[index] = symbolForUser(data.player_id);
+          return newBoard;
+        });
+      })
+      .catch(err => {
+        console.error('Failed to post step:', err);
       });
-    })
-    .catch(err => {
-      console.error('Failed to post step:', err);
-    });
   };
 
-  const renderSquare = (index) => (
-    <button className="square btn btn-outline-dark m-1" style={{ width: '25px', height: '25px' }} onClick={() => handleClick(index)}>
-      {board[index]}
-    </button>
-  );
+  const renderSquare = (index) => {
+    let content;
+    if (board[index] === 'Black') {
+      content = <div style={{ backgroundColor: 'black', width: '100%', height: '100%', borderRadius: '50%' }}></div>;
+    } else if (board[index] === 'White') {
+      content = <div style={{ backgroundColor: 'white', width: '100%', height: '100%', borderRadius: '50%', border: '1px solid black' }}></div>;
+    }
+
+    return (
+      <button className="square btn btn-outline-dark" style={{ width: '30px', height: '30px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0', margin: '0', borderRadius: '0%' }} onClick={() => handleClick(index)}>
+        {content}
+      </button>
+    );
+  };
 
   const renderRows = () => {
     const rows = [];
@@ -120,18 +136,21 @@ function Gomoku({ gameId, socket }) {
       for (let j = 0; j < 15; j++) {
         row.push(renderSquare(i * 15 + j));
       }
-      rows.push(<div className="d-flex justify-content-center mb-2">{row}</div>);
+      rows.push(<div className="d-flex justify-content-center">{row}</div>);
     }
     return rows;
   };
 
   return (
     <div className="container mt-5">
-      {winner ? <div className="alert alert-success text-center">Winner: {winner}</div> : null}
+      {winner ? <div className="alert alert-success text-center">Winner: {winner === 'Black' ? playerBlackUsername : playerWhiteUsername}</div> : null}
       {isDraw ? <div className="alert alert-info text-center">The game is a draw!</div> : null}
-      <div className="text-center my-3">
-        <button className="btn btn-secondary" onClick={() => setShowGGame(false)}>Return to Table</button>
-      </div>
+      {!winner && !isDraw ? <div className="alert alert-dark text-center">Next move: {nextPlayerSymbol}</div> : null}
+      {(winner || isDraw) ?
+        <div className="text-center my-3">
+          <button className="btn btn-dark" onClick={() => setShowGGame(false)}>Return to Table</button>
+        </div>
+        : null}
       {renderRows()}
     </div>
   );

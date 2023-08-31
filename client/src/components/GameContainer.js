@@ -13,14 +13,13 @@ function GameContainer() {
 
   return (
     <div className="container">
-      <h3 className="text-center">Game Room</h3>
       {showTGame ? (
         <TicTacToe socket={socket} gameId={gameId} />
       ) : showGGame ? (
         <Gomoku socket={socket} gameId={gameId} />
       ) : (
         <div className="row">
-          <div className="col-md-6">
+          <div className="col-md-6" style={{ borderRight: '1px solid #b0b0b0' }} >
             <h4 className="text-center">Tic Tac Toe</h4>
             <TicTacToeTableList socket={socket} setGameId={setGameId} />
           </div>

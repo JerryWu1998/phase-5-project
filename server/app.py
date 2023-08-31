@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-
-# Standard library imports
-
 # Remote library imports
 from flask import request, make_response, session
 from flask_restful import Resource
@@ -92,7 +88,7 @@ class ChatById(Resource):
 api.add_resource(Chats, '/chats')
 api.add_resource(ChatById, '/chats/<int:id>')
 
-# WebSocket route for live chat
+# WebSocket route for chat
 @socketio.on('send_message')
 def handle_message(data):
     sender_id = data['sender_id']
@@ -141,6 +137,28 @@ def logout():
     return make_response({'message': 'Logged out successfully'}, 204)
 
 
+# Change Password
+@app.route('/change_password', methods=['PATCH'])
+def change_password():
+    data = request.get_json()
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return make_response({"error": "Not logged in"}, 403)
+
+    user = User.query.filter_by(id=user_id).first()
+    
+    if not user.authenticate(old_password):
+        return make_response({"error": "Old password is incorrect"}, 401)
+
+    user.password_hash = new_password 
+    db.session.commit()
+    
+    return make_response({"message": "Password changed successfully"}, 200)
+
+
 # TicTacToe Resource
 class TicTacToeGames(Resource):
     def get(self):
@@ -187,7 +205,6 @@ class TicTacToeSteps(Resource):
             db.session.add(new_step)
             db.session.commit()
 
-            # Broadcast the new step first
             socketio.emit('broadcast_step', new_step.to_dict())
 
             game = TicTacToe.query.filter_by(id=data['game_id']).first()
@@ -201,7 +218,7 @@ class TicTacToeSteps(Resource):
                 game.game_status = "completed"
                 db.session.commit()
                 
-                # Notify front-end about the winner
+                # Notify frontend about the winner
                 socketio.emit('announce_winner', {'game_id': new_step.game_id, 'winner_id': game.winner_id})
                 socketio.emit('broadcast_step', new_step.to_dict())
                 return make_response({"winner": data['player_id']})
@@ -211,7 +228,7 @@ class TicTacToeSteps(Resource):
                 game.game_status = "draw"
                 db.session.commit()
                 
-                # Notify front-end about the draw
+                # Notify frontend about the draw
                 socketio.emit('announce_draw', {'game_id': new_step.game_id})
                 socketio.emit('broadcast_step', new_step.to_dict())
                 return make_response({"result": "draw"})
@@ -377,7 +394,6 @@ class GomokuSteps(Resource):
             db.session.add(new_step)
             db.session.commit()
 
-            # Broadcast the new step first
             socketio.emit('gomoku_broadcast_step', new_step.to_dict())
 
             game = Gomoku.query.filter_by(id=data['game_id']).first()
@@ -396,7 +412,7 @@ class GomokuSteps(Resource):
                 game.game_status = "completed"
                 db.session.commit()
 
-                # Notify front-end about the winner
+                # Notify frontend about the winner
                 socketio.emit('gomoku_announce_winner', {'game_id': new_step.game_id, 'winner_id': game.winner_id})
                 socketio.emit('gomoku_broadcast_step', new_step.to_dict())
                 return make_response({"winner": data['player_id']})
@@ -406,7 +422,7 @@ class GomokuSteps(Resource):
                 game.game_status = "draw"
                 db.session.commit()
 
-                # Notify front-end about the draw
+                # Notify frontend about the draw
                 socketio.emit('gomoku_announce_draw', {'game_id': new_step.game_id})
                 socketio.emit('gomoku_broadcast_step', new_step.to_dict())
                 return make_response({"result": "draw"})
@@ -418,7 +434,6 @@ class GomokuSteps(Resource):
                 game.current_player_id = game.player_black_id
             db.session.commit()
 
-            # Broadcast the current player
             socketio.emit('gomoku_update_game', {'game_id': new_step.game_id, 'current_player_id': game.current_player_id})
 
             return make_response(new_step.to_dict(), 201)
@@ -477,7 +492,6 @@ class GomokuTableById(Resource):
             return make_response({"message": "Table not found"}, 404)
         return make_response(table.to_dict())
 
-# Assuming you're using Flask-RESTful's Api object named 'api'
 api.add_resource(GomokuTables, '/gomokutables')
 api.add_resource(GomokuTableById, '/gomokutables/<int:id>')
 
@@ -529,7 +543,6 @@ def handle_gomoku_join_table(data):
         db.session.add(new_game)
         db.session.commit()
 
-        # Notify frontend that game started
         socketio.emit('gomoku_game_started', {
             'table_id': table_id,
             'game_id': new_game.id

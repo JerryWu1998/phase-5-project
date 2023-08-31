@@ -124,10 +124,10 @@ function TicTacToe({ gameId, socket }) {
         {winner ? <div className="alert alert-success text-center">Winner: {winner === 'X' ? playerXUsername : playerOUsername}</div> : null}
         {isDraw ? <div className="alert alert-info text-center">The game is a draw!</div> : null}
         {!winner && !isDraw ? 
-            <div className="alert alert-primary text-center">Next move: {nextPlayerSymbol}</div> : null}
+            <div className="alert alert-dark text-center">Next move: {nextPlayerSymbol}</div> : null}
         {(winner || isDraw) ?
             <div className="text-center my-3">
-                <button className="btn btn-secondary" onClick={() => setShowTGame(false)}>Return to Table</button>
+                <button className="btn btn-dark" onClick={() => setShowTGame(false)}>Return to Table</button>
             </div>
             : null}
         <div className="d-flex justify-content-center mb-2">

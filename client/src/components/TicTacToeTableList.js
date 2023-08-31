@@ -77,7 +77,7 @@ function TicTacToeTableList({ socket, setGameId }) {
               alt="Table" style={{ width: '100px', height: '80px' }} />
             <button
               style={{ height: '40px' }}
-              className="btn btn-dark mx-2"
+              className="btn btn-light mx-2 border border-dark"
               disabled={(isUserAlreadySeated() && table.player_o_id !== currentUser.id) || isSeatTaken(table.player_o_id)}
               onClick={() => joinTable(table.id, "O")}>
               {table.player_o_id ? `${table.player_o.username} (O)` : 'O'}

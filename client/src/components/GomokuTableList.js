@@ -73,7 +73,7 @@ function GomokuTableList({ socket, setGameId }) {
               alt="Table" style={{ width: '100px', height: '80px' }} />
             <button
               style={{ height: '40px' }}
-              className="btn btn-dark mx-2"
+              className="btn btn-light mx-2 border border-dark"
               disabled={(isUserAlreadySeated() && table.player_white_id !== currentUser.id) || isSeatTaken(table.player_white_id)}
               onClick={() => joinTable(table.id, "White")}>
               {table.player_white_id ? `${table.player_white.username} (White)` : 'White'}
