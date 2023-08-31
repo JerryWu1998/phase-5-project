@@ -173,6 +173,7 @@ function Profile() {
           <button className="btn btn-dark" onClick={() => setShowChangePasswordForm(true)}>Change Password</button>
         )}
       </div>
+      
       {/* TicTacToe records */}
       <h4 className='mt-5'>TicTacToe Records</h4>
       <div className="mt-2" style={{ padding: '20px', maxHeight: '400px', margin: 'auto', overflowY: 'auto' }}>
@@ -191,7 +192,7 @@ function Profile() {
                   <td style={{ textAlign: 'center' }}>{record.player_x.username}</td>
                   <td style={{ textAlign: 'center' }}>{record.player_o.username}</td>
                   <td style={{ textAlign: 'center' }}>
-                    {record.winner_id === currentUser.id ? 'Won' : record.winner_id ? 'Lost' : 'N/A'}
+                    {record.winner_id === currentUser.id ? 'Won' : record.winner_id ? 'Lost' : record.game_status === "draw" ? 'Draw' : 'N/A'}
                   </td>
                 </tr>
               ))}
@@ -220,7 +221,7 @@ function Profile() {
                   <td style={{ textAlign: 'center' }}>{record.player_black.username}</td>
                   <td style={{ textAlign: 'center' }}>{record.player_white.username}</td>
                   <td style={{ textAlign: 'center' }}>
-                    {record.winner_id === currentUser.id ? 'Won' : record.winner_id ? 'Lost' : 'N/A'}
+                    {record.winner_id === currentUser.id ? 'Won' : record.winner_id ? 'Lost' : record.game_status === "draw" ? 'Draw' : 'N/A'}
                   </td>
                 </tr>
               ))}
